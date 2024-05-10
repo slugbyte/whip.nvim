@@ -20,12 +20,23 @@ local telescope_find_files = function()
     if state.root_dir == nil then
         return log_error("error no scratchpad root_dir")
     end
-    return function()
-        telescope_builtin.find_files({
-            hidden = true,
-            cwd = state.root_dir,
-        })
+    telescope_builtin.find_files({
+        hidden = true,
+        cwd = state.root_dir,
+    })
+end
+
+local telescope_live_grep = function()
+    if not telescope_status then
+        return log_error("telescope not found")
     end
+    if state.root_dir == nil then
+        return log_error("error no scratchpad root_dir")
+    end
+    telescope_builtin.live_grep({
+        cwd = state.root_dir,
+        additional_args = { "--hidden" },
+    })
 end
 
 M.setup = function(config)
@@ -37,8 +48,19 @@ M.setup = function(config)
         state.root_dir = config.root_dir
     end
 
-    vim.api.nvim_create_user_command("Scratchpad", telescope_find_files, {})
-    log_info("biew biew biew")
+    vim.api.nvim_create_user_command("Sfind", telescope_find_files, {})
+    vim.api.nvim_create_user_command("Sgrep", telescope_live_grep, {})
+    vim.api.nvim_create_user_command("Snew",
+        function(opt)
+            -- TODO: make this a prompt instead
+            local name = opt.args
+            vim.cmd(string.format(":e %s/%s", state.root_dir, name))
+        end,
+        { nargs = 1 }
+    )
+
+    vim.keymap.set("", "<leader>w", telescope_find_files, { desc = "Scratchpad File Search" })
+    vim.keymap.set("", "<leader>W", telescope_find_files, { desc = "Scratchpad Grep Search" })
 end
 
 return M
