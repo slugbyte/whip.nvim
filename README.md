@@ -1,10 +1,12 @@
-# whip.nvim
+# WHIP.NVIM
 > biew biew biew, a super quick scratchpad manager
 
-## SETUP
+## INSTALL
 * use your favorite package manager to install `slugbyte/whip.nvim` and dependencies
    * [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) 
    * [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+
+## SETUP
 ```lua
 -- example lazy nvim config
 return {
@@ -16,6 +18,7 @@ return {
     config = function()
         local whip = require("whip")
         whip.setup({
+            -- its probs a good idea to have a dir dedicated to your scratchpads
             dir = "~/your/whip/dir/goes-here"
         })
         vim.keymap.set("", "<leader>wo", whip.open, { desc = "[W]hip [O]pen" })
@@ -27,26 +30,26 @@ return {
 ```
 
 ## USAGE
-whip.nvim allows you to quickly edit files in the whip `dir`
-configured with `setup()`. The main benefit it provides over vanilla telescope.nvim is that
-it remembers the last whip you edited.
+whip.nvim allows you to quickly edit files in the whip `dir` configured with `setup()`. 
+The main benefit it provides over vanilla telescope.nvim is that it remembers the last whip you edited.
 
-## lua api
+I use different scratchpads for different projects, and while I'm working on a
+particular project I tend to reference it's scratchpad over and over. I made this thing because I find 
+it super nice to be able to quickly pop open the last scratchpad I used.
+
+## LUA API
 * `whip.open()` open last selected whip file, if no file is selected
 it will trigger `whip.find_file()`
 * `whip.make()` prompt to create a new whip file
 * `whip.find_file()` telescope whip files
 * `whip.find_grep()` telescope grep whip files
 
-## commands
+## COMMANDS
 * `:whipOpen` calls `whip.open()`
 * `:whipMake` calls `whip.make()`
 * `:whipFindFile` calls `whip.find_file()`
 * `:whipFindGrep` calls `whip.find_grep()`
 
-I use different whips for different projects, that I tend to reference a lot while I'm working.
-I find it super nice to be able to quickly pop open then whip for what
-ever I'm working on without having to find_files every time.
 
 ## NOTE
 whip.nvim creates a `.whip.json` in your whip `dir` to keep track of
@@ -55,7 +58,7 @@ your last selected file.
 ## SELF-PROMO
 If you like this project star the GitHub repository :)
 
-## ACKNOWLEDGMENTS
+## ACKNOWLEDGMENT
 > I referenced the source code in these projcects when trying to figure out how to use the nvim apis
 * [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Find, Filter, Preview, Pick. All lua, all the time.
 * [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) - All the lua functions you don't want to write twice.
