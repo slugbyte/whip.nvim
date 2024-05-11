@@ -1,6 +1,8 @@
 # WHIP.NVIM
 > biew biew biew, a super quick scratchpad manager
 
+![whip logo](./asset/whip.png)
+
 ## INSTALL
 * use your favorite package manager to install `slugbyte/whip.nvim` and dependencies
    * [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) 
