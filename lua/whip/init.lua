@@ -14,7 +14,7 @@ local state = {
 }
 
 local log_error = function(fmt, ...)
-    vim.notify("ERROR: scratchpad.nvim " .. string.format(fmt, ...), vim.log.levels.ERROR)
+    vim.notify("ERROR: whip.nvim " .. string.format(fmt, ...), vim.log.levels.ERROR)
 end
 
 local config_check_exists = function()
@@ -39,7 +39,7 @@ local config_load = function()
     end
     local decode_ok, config_data = pcall(vim.fn.json_decode, config_json)
     if not decode_ok then
-        return log_error("cannot parse .scratchpad.json")
+        return log_error("cannot parse .whip.json")
     end
     state.config_data = config_data
 end
@@ -58,19 +58,19 @@ local config_save = function()
     end
 end
 
-local current_scratchpad_path = function()
+local current_whip_path = function()
     if state.config_data == nil or state.config_data.current == nil then
         return nil
     end
     return string.format("%s/%s", state.dir, state.config_data.current)
 end
 
-local current_scratchpad_check_exists = function()
-    local path = current_scratchpad_path()
+local current_whip_check_exists = function()
+    local path = current_whip_path()
     if path == nil then
         return false
     end
-    return Path:new(current_scratchpad_path()):exists()
+    return Path:new(current_whip_path()):exists()
 end
 
 local current_set = function(current)
@@ -89,7 +89,7 @@ local dir_set = function(path)
         return
     end
     state.dir = dir_path:expand()
-    state.config_path = string.format("%s/.scratchpad.json", state.dir)
+    state.config_path = string.format("%s/.whip.json", state.dir)
 end
 
 M.find_file = function()
@@ -97,11 +97,11 @@ M.find_file = function()
         return log_error("could not find telescope")
     end
     if state.dir == nil then
-        return log_error("error no scratchpad dir")
+        return log_error("error no whip dir")
     end
     t_builtin.find_files({
         cwd = state.dir,
-        prompt_title = "Find Scratchpad",
+        prompt_title = "Find whip",
         attach_mappings = function(prompt_bufnr, _)
             t_actions.select_default:replace(function()
                 -- save selected state
@@ -123,7 +123,7 @@ M.find_grep = function()
         return log_error("could not find telescope.nvim")
     end
     if state.dir == nil then
-        return log_error("error no scratchpad dir")
+        return log_error("error no whip dir")
     end
     t_builtin.live_grep({
         cwd = state.dir,
@@ -145,17 +145,17 @@ end
 
 M.make = function()
     local input = vim.fn.input({
-        prompt = "create scratchpad: "
+        prompt = "create whip: "
     })
     current_set(input)
     vim.cmd(string.format("edit %s/%s", state.dir, input))
 end
 
 M.open = function()
-    if not current_scratchpad_check_exists() then
+    if not current_whip_check_exists() then
         return M.find_file()
     end
-    vim.cmd(string.format("edit %s", current_scratchpad_path()))
+    vim.cmd(string.format("edit %s", current_whip_path()))
 end
 
 M.setup = function(opts)
@@ -173,10 +173,10 @@ M.setup = function(opts)
         end
     end
 
-    vim.api.nvim_create_user_command("ScratchpadOpen", M.open, {})
-    vim.api.nvim_create_user_command("ScratchpadMake", M.make, {})
-    vim.api.nvim_create_user_command("ScratchpadFindFile", M.find_file, {})
-    vim.api.nvim_create_user_command("ScratchpadFindGrep", M.find_grep, {})
+    vim.api.nvim_create_user_command("WhipOpen", M.open, {})
+    vim.api.nvim_create_user_command("WhipMake", M.make, {})
+    vim.api.nvim_create_user_command("WhipFindFile", M.find_file, {})
+    vim.api.nvim_create_user_command("WhipFindGrep", M.find_grep, {})
 end
 
 return M
