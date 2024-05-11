@@ -47,10 +47,10 @@ it will trigger `whip.find_file()`
 * `whip.find_grep()` telescope grep whip files
 
 ## COMMANDS
-* `:whipOpen` calls `whip.open()`
-* `:whipMake` calls `whip.make()`
-* `:whipFindFile` calls `whip.find_file()`
-* `:whipFindGrep` calls `whip.find_grep()`
+* `:WhipOpen` calls `whip.open()`
+* `:WhipMake` calls `whip.make()`
+* `:WhipFindFile` calls `whip.find_file()`
+* `:WhipFindGrep` calls `whip.find_grep()`
 
 
 ## NOTE
