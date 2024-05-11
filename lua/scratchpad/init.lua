@@ -13,7 +13,6 @@ local state = {
     },
 }
 
-
 local log_error = function(fmt, ...)
     vim.notify("ERROR: scratchpad.nvim " .. string.format(fmt, ...), vim.log.levels.ERROR)
 end
@@ -23,21 +22,6 @@ local config_check_exists = function()
         return false
     end
     return Path:new(state.config_path):exists()
-end
-
-local current_scratchpad_path = function()
-    if state.config_data == nil or state.config_data.current == nil then
-        return nil
-    end
-    return string.format("%s/%s", state.dir, state.config_data.current)
-end
-
-local current_scratchpad_check_exists = function()
-    local path = current_scratchpad_path()
-    if path == nil then
-        return false
-    end
-    return Path:new(current_scratchpad_path()):exists()
 end
 
 local config_load = function()
@@ -74,7 +58,27 @@ local config_save = function()
     end
 end
 
-local state_set_dir = function(path)
+local current_scratchpad_path = function()
+    if state.config_data == nil or state.config_data.current == nil then
+        return nil
+    end
+    return string.format("%s/%s", state.dir, state.config_data.current)
+end
+
+local current_scratchpad_check_exists = function()
+    local path = current_scratchpad_path()
+    if path == nil then
+        return false
+    end
+    return Path:new(current_scratchpad_path()):exists()
+end
+
+local current_set = function(current)
+    state.config_data.current = current
+    config_save()
+end
+
+local dir_set = function(path)
     local dir_path = Path:new(path)
     if not dir_path:exists() then
         log_error("opts.dir does not exist: %", path)
@@ -103,8 +107,7 @@ M.find_file = function()
                 -- save selected state
                 local selection = t_action_state.get_selected_entry()
                 if selection[1] ~= "" then
-                    state.config_data.current = selection[1]
-                    config_save()
+                    current_set(selection[1])
                 end
 
                 -- do original select
@@ -130,8 +133,7 @@ M.find_grep = function()
                 -- save selected state
                 local selection = t_action_state.get_selected_entry()
                 if selection.filename ~= "" then
-                    state.config_data.current = selection.filename
-                    config_save()
+                    current_set(selection.filename)
                 end
                 -- do original select
                 t_action_set.select(prompt_bufnr, "default")
@@ -145,6 +147,7 @@ M.make = function()
     local input = vim.fn.input({
         prompt = "create scratchpad: "
     })
+    current_set(input)
     vim.cmd(string.format("edit %s/%s", state.dir, input))
 end
 
@@ -164,7 +167,7 @@ M.setup = function(opts)
         return log_error("could not find plenary.nvim")
     end
     if opts.dir then
-        state_set_dir(opts.dir)
+        dir_set(opts.dir)
         if state.config_path ~= nil then
             config_load()
         end
