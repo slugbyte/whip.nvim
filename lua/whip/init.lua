@@ -1,8 +1,8 @@
 local plenary_found, Path = pcall(require, "plenary.path")
-local telescope_found, t_builtin = pcall(require, "telescope.builtin")
-local _, t_actions = pcall(require, "telescope.actions")
-local _, t_action_state = pcall(require, "telescope.actions.state")
-local _, t_action_set = pcall(require, "telescope.actions.set")
+local telescope_found, ts_builtin = pcall(require, "telescope.builtin")
+local _, ts_actions = pcall(require, "telescope.actions")
+local _, ts_action_state = pcall(require, "telescope.actions.state")
+local _, ts_action_set = pcall(require, "telescope.actions.set")
 
 local M = {}
 local state = {
@@ -29,6 +29,22 @@ end
 
 local log_error_dep_not_found = function(dep)
     log_error("could not find %s", dep)
+end
+
+local is_empty = function(value)
+    return value == "" or value == nil
+end
+
+local telescope_check_ok = function()
+    if not telescope_found then
+        log_error_dep_not_found("telescopenvim")
+        return false
+    end
+    if state.dir == nil then
+        log_error("error no whip dir")
+        return false
+    end
+    return true
 end
 
 
@@ -65,7 +81,7 @@ local config_save = function()
         return
     end
 
-    local write_ok, _ = pcall(function()
+    local write_ok = pcall(function()
         Path:new(state.config_path):write(vim.fn.json_encode(state.config_data), "w")
     end)
 
@@ -110,25 +126,21 @@ local dir_set = function(path)
 end
 
 M.find_file = function()
-    if not telescope_found then
-        return log_error_dep_not_found("telescopenvim")
+    if not telescope_check_ok() then
+        return
     end
-    if state.dir == nil then
-        return log_error("error no whip dir")
-    end
-    t_builtin.find_files({
+    ts_builtin.find_files({
         cwd = state.dir,
         prompt_title = "Find whip",
         attach_mappings = function(prompt_bufnr, _)
-            t_actions.select_default:replace(function()
-                -- save selected state
-                local selection = t_action_state.get_selected_entry()
-                if selection[1] ~= "" then
-                    current_set(selection[1])
+            ts_actions.select_default:replace(function()
+                local selection = ts_action_state.get_selected_entry()
+                local filename = selection[1]
+                if is_empty(filename) then
+                    return log_error("no file selecetd")
                 end
-
-                -- do original select
-                t_action_set.select(prompt_bufnr, "default")
+                current_set(filename)
+                ts_action_set.select(prompt_bufnr, "default")
             end)
             return true
         end
@@ -136,24 +148,20 @@ M.find_file = function()
 end
 
 M.find_grep = function()
-    if not telescope_found then
-        return log_error_dep_not_found("telescope")
+    if not telescope_check_ok() then
+        return
     end
-    if state.dir == nil then
-        return log_error("error no whip dir")
-    end
-    t_builtin.live_grep({
+    ts_builtin.live_grep({
         cwd = state.dir,
         additional_args = { "--hidden" },
         attach_mappings = function(prompt_bufnr, _)
-            t_actions.select_default:replace(function()
-                -- save selected state
-                local selection = t_action_state.get_selected_entry()
-                if selection.filename ~= "" then
-                    current_set(selection.filename)
+            ts_actions.select_default:replace(function()
+                local selection = ts_action_state.get_selected_entry()
+                if is_empty(selection.filename) then
+                    return log_error("no selection made")
                 end
-                -- do original select
-                t_action_set.select(prompt_bufnr, "default")
+                current_set(selection.filename)
+                ts_action_set.select(prompt_bufnr, "default")
             end)
             return true
         end
@@ -161,34 +169,31 @@ M.find_grep = function()
 end
 
 M.drop = function()
-    if not telescope_found then
-        return log_error_dep_not_found("telescope")
+    if not telescope_check_ok() then
+        return
     end
-    if state.dir == nil then
-        return log_error("error no whip dir")
-    end
-    t_builtin.find_files({
+    ts_builtin.find_files({
         cwd = state.dir,
         prompt_title = "Delete whip",
         attach_mappings = function(prompt_bufnr, _)
-            t_actions.select_default:replace(function()
-                local selection = t_action_state.get_selected_entry()
-                t_actions.close(prompt_bufnr)
-                local file_name = selection[1]
-                if file_name == "" then
+            ts_actions.select_default:replace(function()
+                local selection = ts_action_state.get_selected_entry()
+                ts_actions.close(prompt_bufnr)
+                local filename = selection[1]
+                if is_empty(filename) then
                     return log_info("aborted delete: no filed selecetd")
                 end
-                log_info("delete (%s)? .. press y for yes ", file_name)
+                log_info("delete (%s)? .. press y for yes ", filename)
                 local confirm_delete = vim.fn.getchar()
                 local leter_y = 121
                 if confirm_delete ~= leter_y then
                     return log_info("aborted delete")
                 end
-                local delete_ok, _ = pcall(function()
+                local delete_ok = pcall(function()
                     Path:new(string.format("%s/%s", state.dir, selection[1])):rm()
                 end)
                 if not delete_ok then
-                    return log_error("failed to delete (%s)", file_name)
+                    return log_error("failed to delete (%s)", filename)
                 end
                 log_info("deleted (%s)", selection[1])
             end)
