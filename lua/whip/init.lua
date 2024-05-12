@@ -8,14 +8,29 @@ local M = {}
 local state = {
     dir = nil,
     config_path = nil,
+    health_data = {
+        dir_ok = false,
+        config_ok = false,
+        plenary_found = plenary_found,
+        telescope_found = telescope_found,
+    },
     config_data = {
         current = nil,
     },
 }
 
+local log_info = function(fmt, ...)
+    vim.notify(string.format(fmt, ...), vim.log.levels.INFO)
+end
+
 local log_error = function(fmt, ...)
     vim.notify("ERROR: whip.nvim " .. string.format(fmt, ...), vim.log.levels.ERROR)
 end
+
+local log_error_dep_not_found = function(dep)
+    log_error("could not find %s", dep)
+end
+
 
 local config_check_exists = function()
     if state.config_path == nil then
@@ -41,6 +56,7 @@ local config_load = function()
     if not decode_ok then
         return log_error("cannot parse .whip.json")
     end
+    state.health_data.config_ok = true
     state.config_data = config_data
 end
 
@@ -88,13 +104,14 @@ local dir_set = function(path)
         log_error("opts.dir is not a directory: %", path)
         return
     end
+    state.health_data.config_ok = true
     state.dir = dir_path:expand()
     state.config_path = string.format("%s/.whip.json", state.dir)
 end
 
 M.find_file = function()
     if not telescope_found then
-        return log_error("could not find telescope")
+        return log_error_dep_not_found("telescopenvim")
     end
     if state.dir == nil then
         return log_error("error no whip dir")
@@ -120,7 +137,7 @@ end
 
 M.find_grep = function()
     if not telescope_found then
-        return log_error("could not find telescope.nvim")
+        return log_error_dep_not_found("telescope")
     end
     if state.dir == nil then
         return log_error("error no whip dir")
@@ -143,6 +160,43 @@ M.find_grep = function()
     })
 end
 
+M.drop = function()
+    if not telescope_found then
+        return log_error_dep_not_found("telescope")
+    end
+    if state.dir == nil then
+        return log_error("error no whip dir")
+    end
+    t_builtin.find_files({
+        cwd = state.dir,
+        prompt_title = "Delete whip",
+        attach_mappings = function(prompt_bufnr, _)
+            t_actions.select_default:replace(function()
+                local selection = t_action_state.get_selected_entry()
+                t_actions.close(prompt_bufnr)
+                local file_name = selection[1]
+                if file_name == "" then
+                    return log_info("aborted delete: no filed selecetd")
+                end
+                log_info("delete (%s)? .. press y for yes ", file_name)
+                local confirm_delete = vim.fn.getchar()
+                local leter_y = 121
+                if confirm_delete ~= leter_y then
+                    return log_info("aborted delete")
+                end
+                local delete_ok, _ = pcall(function()
+                    Path:new(string.format("%s/%s", state.dir, selection[1])):rm()
+                end)
+                if not delete_ok then
+                    return log_error("failed to delete (%s)", file_name)
+                end
+                log_info("deleted (%s)", selection[1])
+            end)
+            return true
+        end
+    })
+end
+
 M.make = function()
     local input = vim.fn.input({
         prompt = "create whip: "
@@ -158,13 +212,17 @@ M.open = function()
     vim.cmd(string.format("edit %s", current_whip_path()))
 end
 
+M._get_state = function()
+    return state
+end
+
 M.setup = function(opts)
     opts = opts or {}
     if not telescope_found then
-        return log_error("could not find telescope.nvim")
+        return log_error_dep_not_found("telescope")
     end
     if not plenary_found then
-        return log_error("could not find plenary.nvim")
+        return log_error_dep_not_found("plenary")
     end
     if opts.dir then
         dir_set(opts.dir)
@@ -175,6 +233,7 @@ M.setup = function(opts)
 
     vim.api.nvim_create_user_command("WhipOpen", M.open, {})
     vim.api.nvim_create_user_command("WhipMake", M.make, {})
+    vim.api.nvim_create_user_command("WhipDrop", M.drop, {})
     vim.api.nvim_create_user_command("WhipFindFile", M.find_file, {})
     vim.api.nvim_create_user_command("WhipFindGrep", M.find_grep, {})
 end

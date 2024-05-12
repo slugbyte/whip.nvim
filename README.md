@@ -25,6 +25,7 @@ return {
         })
         vim.keymap.set("", "<leader>wo", whip.open, { desc = "[W]hip [O]pen" })
         vim.keymap.set("", "<leader>wm", whip.make, { desc = "[W]hip [M]ake" })
+        vim.keymap.set("", "<leader>wd", whip.drop, { desc = "[W]hip [D]rop" })
         vim.keymap.set("", "<leader>wf", whip.find_file, { desc = "[W]hip [F]ile Search" })
         vim.keymap.set("", "<leader>wg", whip.find_grep, { desc = "[W]hip [G]rep Search" })
     end,
@@ -43,12 +44,14 @@ it super nice to be able to quickly pop open the last scratchpad I used.
 * `whip.open()` open last selected whip file, if no file is selected
 it will trigger `whip.find_file()`
 * `whip.make()` prompt to create a new whip file
+* `whip.drop()` delete a whip file from a telescope find and a confirm prompt
 * `whip.find_file()` telescope whip files
 * `whip.find_grep()` telescope grep whip files
 
 ## COMMANDS
 * `:WhipOpen` calls `whip.open()`
 * `:WhipMake` calls `whip.make()`
+* `:WhipDrop` calls `whip.drop()`
 * `:WhipFindFile` calls `whip.find_file()`
 * `:WhipFindGrep` calls `whip.find_grep()`
 
