@@ -9,8 +9,9 @@ local state = {
     dir = nil,
     config_path = nil,
     health_data = {
-        dir_ok = false,
-        config_ok = false,
+        is_setup = false,
+        dir_err = nil,
+        config_err = nil,
         plenary_found = plenary_found,
         telescope_found = telescope_found,
     },
@@ -24,11 +25,13 @@ local log_info = function(fmt, ...)
 end
 
 local log_error = function(fmt, ...)
-    vim.notify("ERROR: whip.nvim " .. string.format(fmt, ...), vim.log.levels.ERROR)
+    local err_msg = "ERROR: whip.nvim " .. string.format(fmt, ...)
+    vim.notify(err_msg, vim.log.levels.ERROR)
+    return err_msg
 end
 
 local log_error_dep_not_found = function(dep)
-    log_error("could not find %s", dep)
+    return log_error("could not find %s", dep)
 end
 
 local is_empty = function(value)
@@ -66,13 +69,14 @@ local config_load = function()
         return Path:new(state.config_path):read()
     end)
     if not read_ok then
+        state.health_data.config_err = log_error("cannot read config file: %s", state.config_path)
         return
     end
     local decode_ok, config_data = pcall(vim.fn.json_decode, config_json)
     if not decode_ok then
-        return log_error("cannot parse .whip.json")
+        state.health_data.config_err = log_error("cannot parse config json: %s", state.config_path)
+        return
     end
-    state.health_data.config_ok = true
     state.config_data = config_data
 end
 
@@ -113,14 +117,13 @@ end
 local dir_set = function(path)
     local dir_path = Path:new(path)
     if not dir_path:exists() then
-        log_error("opts.dir does not exist: %", path)
+        state.health_data.dir_err = log_error("opts.dir does not exist: %", path)
         return
     end
     if not dir_path:is_dir() then
-        log_error("opts.dir is not a directory: %", path)
+        state.health_data.dir_err = log_error("opts.dir is not a directory: %", path)
         return
     end
-    state.health_data.config_ok = true
     state.dir = dir_path:expand()
     state.config_path = string.format("%s/.whip.json", state.dir)
 end
@@ -241,6 +244,7 @@ M.setup = function(opts)
     vim.api.nvim_create_user_command("WhipDrop", M.drop, {})
     vim.api.nvim_create_user_command("WhipFindFile", M.find_file, {})
     vim.api.nvim_create_user_command("WhipFindGrep", M.find_grep, {})
+    state.health_data.is_setup = true
 end
 
 return M
