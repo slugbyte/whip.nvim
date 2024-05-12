@@ -62,8 +62,3 @@ your last selected file.
 
 ## SELF-PROMO
 If you like this project star the GitHub repository :)
-
-## ACKNOWLEDGMENT
-> I referenced the source code in these projcects when trying to figure out how to use the nvim apis
-* [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Find, Filter, Preview, Pick. All lua, all the time.
-* [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) - All the lua functions you don't want to write twice.
