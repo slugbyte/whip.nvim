@@ -33,8 +33,9 @@ return {
 ```
 
 ## USAGE
-whip.nvim allows you to quickly edit files in the whip `dir` configured with `setup()`. 
-The main benefit it provides over vanilla telescope.nvim is that it remembers the last whip you edited.
+whip.nvim allows you to quickly edit and manage files in the whip `dir` configured with `setup()`. 
+A huge benefit of whip is that it always remeber's the last whip file you
+selected/created and will auto open to that file.
 
 I use different scratchpads for different projects, and while I'm working on a
 particular project I tend to reference it's scratchpad over and over. I made this thing because I find 
@@ -55,6 +56,9 @@ it will trigger `whip.find_file()`
 * `:WhipFindFile` calls `whip.find_file()`
 * `:WhipFindGrep` calls `whip.find_grep()`
 
+
+## CHECKHEALTH
+Run `:checkhealth whip` to check for trouble with your configuration
 
 ## NOTE
 whip.nvim creates a `.whip.json` in your whip `dir` to keep track of
