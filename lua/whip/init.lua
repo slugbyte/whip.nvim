@@ -117,11 +117,11 @@ end
 local dir_set = function(path)
     local dir_path = Path:new(path)
     if not dir_path:exists() then
-        state.health_data.dir_err = log_error("opts.dir does not exist: %", path)
+        state.health_data.dir_err = log_error("opts.dir does not exist: %s", path)
         return
     end
     if not dir_path:is_dir() then
-        state.health_data.dir_err = log_error("opts.dir is not a directory: %", path)
+        state.health_data.dir_err = log_error("opts.dir is not a directory: %s", path)
         return
     end
     state.dir = dir_path:expand()
