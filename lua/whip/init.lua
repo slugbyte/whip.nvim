@@ -50,7 +50,6 @@ local telescope_check_ok = function()
     return true
 end
 
-
 local config_check_exists = function()
     if state.config_path == nil then
         return false
@@ -146,7 +145,7 @@ M.find_file = function()
                 ts_action_set.select(prompt_bufnr, "default")
             end)
             return true
-        end
+        end,
     })
 end
 
@@ -167,7 +166,7 @@ M.find_grep = function()
                 ts_action_set.select(prompt_bufnr, "default")
             end)
             return true
-        end
+        end,
     })
 end
 
@@ -201,13 +200,13 @@ M.drop = function()
                 log_info("deleted (%s)", selection[1])
             end)
             return true
-        end
+        end,
     })
 end
 
 M.make = function()
     local input = vim.fn.input({
-        prompt = "create whip: "
+        prompt = "create whip: ",
     })
     current_set(input)
     vim.cmd(string.format("edit %s/%s", state.dir, input))
