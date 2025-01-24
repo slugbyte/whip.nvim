@@ -22,7 +22,7 @@ return {
         whip.setup({
             -- its probs a good idea to have a dir dedicated to your scratchpads
             dir = "~/your/whip/dir/goes-here",
-            autocreate = true -- Autocreates a whip file if it doesn't already exist when using whip.find_file
+            autocreate = true -- Autocreates a whip file if the results list is empty when using whip.find_file
         })
         vim.keymap.set("", "<leader>wo", whip.open, { desc = "[W]hip [O]pen" })
         vim.keymap.set("", "<leader>wm", whip.make, { desc = "[W]hip [M]ake" })
