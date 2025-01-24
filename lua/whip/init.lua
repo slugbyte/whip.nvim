@@ -8,6 +8,7 @@ local M = {}
 local state = {
     dir = nil,
     config_path = nil,
+    config_autocreate = false,
     health_data = {
         is_setup = false,
         dir_err = nil,
@@ -137,6 +138,12 @@ M.find_file = function()
         attach_mappings = function(prompt_bufnr, _)
             ts_actions.select_default:replace(function()
                 local selection = ts_action_state.get_selected_entry()
+                if not selection and state.config_autocreate then
+                    local newfile = ts_action_state.get_current_line()
+                    current_set(newfile)
+                    vim.cmd(string.format("edit! %s/%s", state.dir, newfile))
+                    return true
+                end
                 local filename = selection[1]
                 if is_empty(filename) then
                     return log_error("no file selecetd")
@@ -230,6 +237,9 @@ M.setup = function(opts)
     end
     if not plenary_found then
         return log_error_dep_not_found("plenary")
+    end
+    if opts.autocreate then
+        state.config_autocreate = opts.autocreate
     end
     if opts.dir then
         dir_set(opts.dir)
