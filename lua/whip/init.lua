@@ -144,9 +144,14 @@ M.find_file = function()
                     vim.cmd(string.format("edit! %s/%s", state.dir, newfile))
                     return true
                 end
+                if not selection then
+                    log_error("no file selecetd")
+                    return true
+                end
                 local filename = selection[1]
                 if is_empty(filename) then
-                    return log_error("no file selecetd")
+                    log_error("no file selecetd")
+                    return true
                 end
                 current_set(filename)
                 ts_action_set.select(prompt_bufnr, "default")
